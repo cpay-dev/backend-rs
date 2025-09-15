@@ -42,7 +42,15 @@ async fn start() -> Result<(), AppError> {
 
   let addr: SocketAddr = config.listen_addr.parse()?;
   info!(%addr, grpc_addr = %config.merchant_grpc_addr, "starting merchant HTTP API");
-  axum::serve(tokio::net::TcpListener::bind(addr).await?, router).await?;
+
+  let listener = tokio::net::TcpListener::bind(addr).await?;
+  let local_addr = listener.local_addr()?;
+  info!(%local_addr, grpc_addr = %config.merchant_grpc_addr, "merchant HTTP API started");
+
+  axum::serve(listener, router)
+    .with_graceful_shutdown(shutdown_signal())
+    .await?;
+  info!("merchant HTTP API stopped");
   Ok(())
 }
 
@@ -62,4 +70,27 @@ fn resolve_config_path_from_args() -> Result<std::path::PathBuf, AppError> {
     i += 1;
   }
   Ok(path)
+}
+
+async fn shutdown_signal() {
+  #[cfg(unix)]
+  {
+    let mut term_signal = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+      .expect("failed to install SIGTERM handler");
+    tokio::select! {
+      _ = tokio::signal::ctrl_c() => {
+        info!("received SIGINT; shutting down");
+      }
+      _ = term_signal.recv() => {
+        info!("received SIGTERM; shutting down");
+      }
+    }
+    return;
+  }
+
+  #[cfg(not(unix))]
+  {
+    let _ = tokio::signal::ctrl_c().await;
+    info!("received interrupt; shutting down");
+  }
 }
