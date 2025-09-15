@@ -10,7 +10,7 @@ use crate::http::{auth, handlers};
 use axum::{Router, routing::get};
 use std::net::SocketAddr;
 use tower_http::trace::TraceLayer;
-use tracing::{error, info};
+use tracing::{error, info, trace};
 
 #[tokio::main]
 async fn main() {
@@ -27,6 +27,7 @@ async fn start() -> Result<(), AppError> {
     .init();
 
   let config_path = resolve_config_path_from_args()?;
+  trace!(?config_path, "reading config at path");
   let config = Config::from_file(config_path)?;
 
   let grpc_state = GrpcState::connect(&config.merchant_grpc_addr).await?;
