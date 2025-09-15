@@ -50,7 +50,7 @@ fn resolve_config_path_from_args() -> Result<std::path::PathBuf, AppError> {
   let mut path = std::path::PathBuf::from("config.json");
   let mut i = 1;
   while i < args.len() {
-    if args[i] == "-config" {
+    if args[i] == "-config" || args[i] == "--config" {
       if i + 1 >= args.len() {
         return Err(AppError::Config("-config requires a file path".into()));
       }
