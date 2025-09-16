@@ -2,7 +2,7 @@ use crate::http::error::ApiHttpError;
 use axum::{extract::Request, http::HeaderMap, middleware::Next, response::Response};
 use http::header::HeaderName;
 
-pub const API_KEY_HEADER: &str = "x-api-key";
+const API_KEY_HEADER: &str = "x-api-key";
 
 pub async fn auth_middleware(mut req: Request, next: Next) -> Result<Response, ApiHttpError> {
   let headers = req.headers();
