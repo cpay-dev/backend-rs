@@ -35,7 +35,7 @@ async fn start() -> Result<(), AppError> {
   let app_state = http::AppState { grpc: grpc_state };
 
   let router: Router = Router::new()
-    .route("/chains", get(handlers::list_chains))
+    .route("/blockchain/chains", get(handlers::list_chains))
     .layer(TraceLayer::new_for_http())
     .layer(axum::middleware::from_fn(auth::auth_middleware))
     .with_state(app_state);
