@@ -9,7 +9,7 @@ axum = { version = "=0.8.4", features = ["http2"] }
 thiserror = "=2.0.14"
 tracing = "=0.1.41"
 tracing-subscriber = { version = "=0.3.19", features = ["fmt", "env-filter"] }
-cpay-proto = { git = "https://github.com/cpay-dev/proto-rs", rev = "aa937cab54fd38151771f220f0404b15280d1474" }
+cpay-proto = { git = "https://github.com/cpay-dev/proto-rs", rev = "2e9e7973a28e3a65b7b1bab17f5a06e588cd7d31" }
 tonic = { version = "=0.14.2", features = ["transport"] }
 tower-http = { version = "=0.6.6", features = ["trace"] }
 serde = { version = "=1.0.223", features = ["derive"] }
