@@ -1,0 +1,6 @@
+BEGIN;
+
+DROP TABLE IF EXISTS kms.keys;
+DROP TYPE IF EXISTS kms.key_status;
+
+COMMIT;

@@ -1,21 +1,25 @@
 mod config;
+mod crypto;
 mod error;
-mod grpc;
-mod http;
+mod input;
+mod kdf;
+mod service;
 
 use crate::config::Config;
+use crate::crypto::WrappedMasterKey;
 use crate::error::AppError;
-use crate::grpc::GrpcState;
-use crate::http::{auth, handlers};
-use axum::{Router, routing::get};
+use crate::input::{read_line, read_secure};
+use crate::kdf::derive_master_key;
+use crate::service::RootKeyService;
 use std::net::SocketAddr;
-use tower_http::trace::TraceLayer;
+use tonic::transport::Server;
 use tracing::{error, info, trace};
 
 #[tokio::main]
 async fn main() {
   if let Err(e) = start().await {
-    error!(error = ?e, "failed to start merchant API");
+    error!(error = ?e, "failed to start rks api");
+    std::process::exit(1);
   }
 }
 
@@ -30,31 +34,43 @@ async fn start() -> Result<(), AppError> {
   trace!(?config_path, "reading config at path");
   let config = Config::from_file(config_path)?;
 
-  let grpc_state = GrpcState::connect(&config.merchant_grpc_addr).await?;
+  let wrapper = WrappedMasterKey::new({
+    let secret = read_secure("argon secret: ")?;
+    let salt_ulid = {
+      if config.salt.is_empty() {
+        let salt_ulid_input = read_line("salt ulid: ")?;
+        ulid::Ulid::from_string(&salt_ulid_input)?
+      } else {
+        ulid::Ulid::from_string(&config.salt)?
+      }
+    };
+    let salt_bytes = zeroize::Zeroizing::new(salt_ulid.to_bytes());
+    let password = read_secure("password: ")?;
 
-  let app_state = http::AppState { grpc: grpc_state };
+    info!("deriving master key");
+    let mk = derive_master_key(&config.argon, &secret, &password, &*salt_bytes)?;
+    info!("key derived");
+    mk
+  })?;
 
-  let blockchain_router = Router::new()
-    .route("/chains", get(handlers::list_chains))
-    .route("/{id}/assets", get(handlers::list_assets));
-
-  let router: Router = Router::new()
-    .nest("/blockchain", blockchain_router)
-    .layer(TraceLayer::new_for_http())
-    .layer(axum::middleware::from_fn(auth::auth_middleware))
-    .with_state(app_state);
+  let service = RootKeyService::new(wrapper, config.version);
 
   let addr: SocketAddr = config.listen_addr.parse()?;
-  info!(%addr, grpc_addr = %config.merchant_grpc_addr, "starting merchant HTTP API");
+  info!(%addr, "starting gRPC");
 
-  let listener = tokio::net::TcpListener::bind(addr).await.map_err(AppError::HttpBind)?;
+  let listener = tokio::net::TcpListener::bind(addr).await?;
   let local_addr = listener.local_addr()?;
-  info!(%local_addr, grpc_addr = %config.merchant_grpc_addr, "merchant HTTP API started");
+  info!(%local_addr, "serving gRPC");
 
-  axum::serve(listener, router)
-    .with_graceful_shutdown(shutdown_signal())
+  Server::builder()
+    .add_service(service.into_server())
+    .serve_with_incoming_shutdown(
+      tokio_stream::wrappers::TcpListenerStream::new(listener),
+      shutdown_signal(),
+    )
     .await?;
-  info!("merchant HTTP API stopped");
+
+  info!("rks gRPC API stopped");
   Ok(())
 }
 

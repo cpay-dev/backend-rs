@@ -1,17 +1,18 @@
 [package]
-name = "api-merchant"
+name = "api-kms-test"
 version = "1.0.1"
 edition = "2024"
 
 [dependencies]
-tokio = { version = "=1.47.1", features = ["rt-multi-thread", "macros", "rt", "signal"] }
-axum = { version = "=0.8.4", features = ["http2"] }
 thiserror = "=2.0.14"
 tracing = "=0.1.41"
 tracing-subscriber = { version = "=0.3.19", features = ["fmt", "env-filter"] }
+ulid = { version = "=1.2.1" }
+zeroize = { version = "=1.8.1" }
+chacha20poly1305 = { version = "=0.11.0-rc.1", features = ["zeroize"] }
 cpay-proto = { git = "https://github.com/cpay-dev/proto-rs", rev = "f778f79b62c14a7cd248b1c5791dd14ba29575a0" }
+tokio = { version = "=1.47.1", features = ["rt-multi-thread", "macros", "rt", "signal"] }
 tonic = { version = "=0.14.2", features = ["transport"] }
-tower-http = { version = "=0.6.6", features = ["trace"] }
 serde = { version = "=1.0.225", features = ["derive"] }
 serde_json = "=1.0.145"
-http = "=1.3.1"
+lib-crypto = { path = "../../lib/crypto" }

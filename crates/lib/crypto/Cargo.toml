@@ -1,0 +1,9 @@
+[package]
+name = "lib-crypto"
+version = "1.0.1"
+edition = "2024"
+
+[dependencies]
+thiserror = "=2.0.14"
+zeroize = { version = "=1.8.1" }
+chacha20poly1305 = { version = "=0.11.0-rc.1", features = ["zeroize"] }

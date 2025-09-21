@@ -1,21 +1,20 @@
 use std::str::FromStr;
 
 use crate::error::AppError;
-use cpay_proto::cpay;
-use tonic::metadata::{MetadataKey, MetadataValue};
+use cpay_proto::cpay::api::v1::merchant::merchant_service_client;
 use tonic::metadata::errors::InvalidMetadataValue;
+use tonic::metadata::{MetadataKey, MetadataValue};
 
 const API_KEY_HEADER: &str = "x-api-key";
 
 #[derive(Clone)]
 pub struct GrpcState {
-  pub merchant: cpay::api::v1::merchant::merchant_service_client::MerchantServiceClient<tonic::transport::Channel>,
+  pub merchant: merchant_service_client::MerchantServiceClient<tonic::transport::Channel>,
 }
 
 impl GrpcState {
   pub async fn connect(addr: &str) -> Result<Self, AppError> {
-    let merchant =
-      cpay::api::v1::merchant::merchant_service_client::MerchantServiceClient::connect(addr.to_string()).await?;
+    let merchant = merchant_service_client::MerchantServiceClient::connect(addr.to_string()).await?;
     Ok(Self { merchant })
   }
 }
