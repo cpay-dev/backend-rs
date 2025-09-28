@@ -1,4 +1,3 @@
-use crate::error::AppError;
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
