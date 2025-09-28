@@ -20,3 +20,4 @@ rustls-tokio-postgres = { version = "=0.1.2" }
 tokio-postgres = { version = "=0.7.13" }
 postgres-types = { version = "=0.2.9", features = ["derive"] }
 lib-crypto = { path = "../../lib/crypto" }
+app-config = { path = "../../lib/app-config" }

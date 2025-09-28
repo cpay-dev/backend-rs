@@ -5,10 +5,11 @@ mod repo;
 use crate::config::Config;
 use crate::error::AppError;
 use crate::repo::Repository;
+use app_config::resolve_config_from_args;
 use chacha20poly1305::{KeyInit, XChaCha20Poly1305};
 use cpay_proto::cpay::api::v1::kms::{WrapKeyRequest, key_management_service_client::KeyManagementServiceClient};
 use lib_crypto::ZeroizingKey;
-use tracing::{error, info, trace};
+use tracing::{debug, error, info, trace};
 
 #[tokio::main]
 async fn main() {
@@ -25,14 +26,14 @@ async fn start() -> Result<(), AppError> {
     .compact()
     .init();
 
-  let config_path = resolve_config_path_from_args()?;
-  trace!(?config_path, "reading config at path");
-  let config = Config::from_file(config_path)?;
+  let config: Config = resolve_config_from_args()?;
+  debug!("config loaded");
 
   trace!(addr = %config.root_grpc_addr, "connecting to root key service");
   let mut rks_client = KeyManagementServiceClient::connect(config.root_grpc_addr).await?;
 
   let repo = Repository::init(&config.database).await?;
+  info!("initializing kek...");
 
   let (wrapped_key, root_key_version) = {
     let rnd_key = ZeroizingKey::new(XChaCha20Poly1305::generate_key().map_err(AppError::AeadGenerateKey)?);
@@ -53,6 +54,7 @@ async fn start() -> Result<(), AppError> {
     let wrapped_key = lib_crypto::decrypt_data(&transit_cipher, response.encrypted_data)?;
     (wrapped_key, response.version)
   };
+  info!("saving kek...");
 
   repo
     .insert_key(&crate::repo::KekRecord {
@@ -62,26 +64,8 @@ async fn start() -> Result<(), AppError> {
       encrypted_key: wrapped_key.to_vec(),
     })
     .await?;
-  info!("key inserted");
+  info!("kek saved");
 
   repo.shutdown().await?;
   Ok(())
-}
-
-fn resolve_config_path_from_args() -> Result<std::path::PathBuf, AppError> {
-  let args: Vec<String> = std::env::args().collect();
-  let mut path = std::path::PathBuf::from("config.json");
-  let mut i = 1;
-  while i < args.len() {
-    if args[i] == "-config" || args[i] == "--config" {
-      if i + 1 >= args.len() {
-        return Err(AppError::MissingConfigPath);
-      }
-      path = std::path::PathBuf::from(&args[i + 1]);
-      i += 2;
-      continue;
-    }
-    i += 1;
-  }
-  Ok(path)
 }
