@@ -35,6 +35,8 @@ async fn start() -> Result<(), AppError> {
   debug!("config loaded");
 
   let wrapper = WrappedMasterKey::new({
+    _ = read_line("reading input")?;
+
     let secret = read_secure("argon secret: ")?;
     let salt_ulid = {
       if config.salt.is_empty() {
