@@ -82,8 +82,8 @@ impl Repository {
       let status: KeyStatus = row.get(2);
       let encrypted_key: Vec<u8> = row.get(3);
       out.push(KekRecord {
-        key_version: key_version as u32,
-        root_key_version: root_key_version as u32,
+        key_version: u32::try_from(key_version).expect("key version too large"),
+        root_key_version: u32::try_from(root_key_version).expect("root key version too large"),
         status,
         encrypted_key,
       });

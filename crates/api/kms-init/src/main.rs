@@ -56,8 +56,8 @@ async fn start() -> Result<(), AppError> {
 
   repo
     .insert_key(&crate::repo::KekRecord {
-      key_version: config.version as i32,
-      root_key_version: root_key_version as i32,
+      key_version: i32::try_from(config.version).expect("version too large"),
+      root_key_version: i32::try_from(root_key_version).expect("root key version too large"),
       status: crate::repo::KeyStatus::Active,
       encrypted_key: wrapped_key.to_vec(),
     })

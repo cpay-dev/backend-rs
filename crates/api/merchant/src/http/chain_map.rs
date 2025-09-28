@@ -57,8 +57,8 @@ impl core::str::FromStr for ChainCode {
   }
 }
 
-pub fn chain_code_from_proto_enum(e: cpay::api::v1::blockchain::ChainId) -> Result<ChainCode, ApiHttpError> {
-  use cpay::api::v1::blockchain::ChainId as E;
+pub fn chain_code_from_proto_enum(e: cpay::blockchain::v1::Chain) -> Result<ChainCode, ApiHttpError> {
+  use cpay::blockchain::v1::Chain as E;
   match e {
     E::Unspecified => Err(ApiHttpError::Internal("chain unspecified".into())),
     E::Any => Ok(ChainCode::ChainAny),
@@ -74,8 +74,8 @@ pub fn chain_code_from_proto_enum(e: cpay::api::v1::blockchain::ChainId) -> Resu
   }
 }
 
-pub fn proto_enum_from_chain_code(code: ChainCode) -> cpay::api::v1::blockchain::ChainId {
-  use cpay::api::v1::blockchain::ChainId as E;
+pub fn proto_enum_from_chain_code(code: ChainCode) -> cpay::blockchain::v1::Chain {
+  use cpay::blockchain::v1::Chain as E;
   match code {
     ChainCode::ChainAny => E::Any,
     ChainCode::AnyBtc => E::AnyBtc,
@@ -91,13 +91,13 @@ pub fn proto_enum_from_chain_code(code: ChainCode) -> cpay::api::v1::blockchain:
 }
 
 pub fn chain_code_str_from_proto_value(id: i32) -> Result<String, ApiHttpError> {
-  let e = cpay::api::v1::blockchain::ChainId::try_from(id)
+  let e = cpay::blockchain::v1::Chain::try_from(id)
     .map_err(|err| ApiHttpError::Internal(format!("unknown chain id {}: {}", id, err)))?;
   let code = chain_code_from_proto_enum(e)?;
   Ok(code.as_str().to_string())
 }
 
-pub fn proto_enum_from_code_str(s: &str) -> Result<cpay::api::v1::blockchain::ChainId, ApiHttpError> {
+pub fn proto_enum_from_code_str(s: &str) -> Result<cpay::blockchain::v1::Chain, ApiHttpError> {
   match s.parse::<ChainCode>() {
     Ok(code) => Ok(proto_enum_from_chain_code(code)),
     Err(_) => Err(ApiHttpError::BadRequest("invalid chain id".into())),

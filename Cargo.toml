@@ -6,6 +6,9 @@ members = [
     "crates/api/merchant",
     "crates/api/rks",
     "crates/api/wallet",
+    "crates/blockchain/tx-indexer-evm",
+    "crates/blockchain/tx-parser-evm",
+    "crates/lib/app-config",
     "crates/lib/crypto",
 ]
 resolver = "2"

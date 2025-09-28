@@ -11,9 +11,10 @@ use crate::error::AppError;
 use crate::input::{read_line, read_secure};
 use crate::kdf::derive_master_key;
 use crate::service::RootKeyService;
+use app_config::resolve_config_from_args;
 use std::net::SocketAddr;
 use tonic::transport::Server;
-use tracing::{error, info, trace};
+use tracing::{debug, error, info};
 
 #[tokio::main]
 async fn main() {
@@ -30,9 +31,8 @@ async fn start() -> Result<(), AppError> {
     .compact()
     .init();
 
-  let config_path = resolve_config_path_from_args()?;
-  trace!(?config_path, "reading config at path");
-  let config = Config::from_file(config_path)?;
+  let config: Config = resolve_config_from_args()?;
+  debug!("config loaded");
 
   let wrapper = WrappedMasterKey::new({
     let secret = read_secure("argon secret: ")?;
@@ -56,8 +56,6 @@ async fn start() -> Result<(), AppError> {
   let service = RootKeyService::new(wrapper, config.version);
 
   let addr: SocketAddr = config.listen_addr.parse()?;
-  info!(%addr, "starting gRPC");
-
   let listener = tokio::net::TcpListener::bind(addr).await?;
   let local_addr = listener.local_addr()?;
   info!(%local_addr, "serving gRPC");
@@ -72,24 +70,6 @@ async fn start() -> Result<(), AppError> {
 
   info!("rks gRPC API stopped");
   Ok(())
-}
-
-fn resolve_config_path_from_args() -> Result<std::path::PathBuf, AppError> {
-  let args: Vec<String> = std::env::args().collect();
-  let mut path = std::path::PathBuf::from("config.json");
-  let mut i = 1;
-  while i < args.len() {
-    if args[i] == "-config" || args[i] == "--config" {
-      if i + 1 >= args.len() {
-        return Err(AppError::MissingConfigPath);
-      }
-      path = std::path::PathBuf::from(&args[i + 1]);
-      i += 2;
-      continue;
-    }
-    i += 1;
-  }
-  Ok(path)
 }
 
 async fn shutdown_signal() {

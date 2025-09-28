@@ -1,7 +1,7 @@
 use crate::error::AppError;
 use chacha20poly1305::{KeyInit, XChaCha20Poly1305};
-use cpay_proto::cpay::api::v1::blockchain::ChainId;
 use cpay_proto::cpay::api::v1::kms::WrapKeyRequest;
+use cpay_proto::cpay::blockchain::v1::Chain;
 use lib_crypto::ZeroizingKey;
 use tonic::{Request, Response, Status};
 
@@ -34,13 +34,13 @@ impl WalletService for WalletServiceImpl {
   ) -> Result<Response<CreateWalletResponse>, Status> {
     let req = request.into_inner();
 
-    let chain = ChainId::try_from(req.chain).map_err(|_| Status::invalid_argument("Invalid chain"))?;
+    let chain = Chain::try_from(req.chain).map_err(|_| Status::invalid_argument("Invalid chain"))?;
 
     let transit_cipher = XChaCha20Poly1305::new_from_slice(&req.transit_key)
       .map_err(|_| Status::invalid_argument("Invalid transit key"))?;
 
     match chain {
-      ChainId::AnyEvm => {
+      Chain::AnyEvm => {
         let pk = alloy::signers::local::PrivateKeySigner::random();
         let raw_pk = zeroize::Zeroizing::new(pk.to_field_bytes());
 

@@ -14,14 +14,10 @@ pub enum AppError {
   MissingConfigPath,
   #[error("aead generate key error: {0}")]
   AeadGenerateKey(chacha20poly1305::aead::rand_core::OsError),
-  #[error("aead generate nonce error: {0}")]
-  AeadGenerateNonce(chacha20poly1305::aead::rand_core::OsError),
   #[error("aead error: {0}")]
   Aead(#[from] chacha20poly1305::aead::Error),
   #[error("crypto error: {0}")]
   Crypto(#[from] lib_crypto::Error),
-  #[error("invalid nonce length: {0}")]
-  InvalidNonceLen(usize),
   #[error("grpc transport error: {0}")]
   GrpcTransport(#[from] tonic::transport::Error),
   #[error("grpc status: {0}")]

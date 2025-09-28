@@ -39,7 +39,7 @@ pub async fn list_assets(
 ) -> Result<impl IntoResponse, ApiHttpError> {
   let chain_id = super::chain_map::proto_enum_from_code_str(&id)?;
 
-  let req = cpay::api::v1::merchant::ListAssetsRequest { chain: chain_id as i32 };
+  let req = cpay::api::v1::merchant::ListAssetsRequest { chain_id: chain_id.into() };
   let req = tonic::Request::new(req);
   let req = insert_api_key(req, &api_key).map_err(|_| ApiHttpError::Unauthorized)?;
 
