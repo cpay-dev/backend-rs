@@ -6,6 +6,7 @@ pub struct Config {
   pub listen_addr: String,
   pub salt: String,
   pub argon: ArgonConfig,
+  pub expected_hash: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]

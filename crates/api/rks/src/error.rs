@@ -14,6 +14,9 @@ pub enum AppError {
   #[error("argon2 error: {0}")]
   Argon2(#[from] argon2::Error),
 
+  #[error("invalid hash: {0}")]
+  InvalidHash(String),
+
   #[error("ulid decode error: {0}")]
   UlidDecode(#[from] ulid::DecodeError),
 

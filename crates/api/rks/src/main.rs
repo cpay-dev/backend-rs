@@ -51,7 +51,16 @@ async fn start() -> Result<(), AppError> {
 
     info!("deriving master key");
     let mk = derive_master_key(&config.argon, &secret, &password, &*salt_bytes)?;
-    info!("key derived");
+
+    use sha3::Digest;
+    let mut hasher = sha3::Sha3_256::new();
+    hasher.update(&mk);
+    let hash = hasher.finalize();
+    let hash = String::from_utf8(hash.to_ascii_lowercase()).expect("failed to convert hash to string");
+    info!(hash = ?hash, "key derived");
+    if hash != config.expected_hash {
+      return Err(AppError::InvalidHash(hash));
+    }
     mk
   })?;
 
