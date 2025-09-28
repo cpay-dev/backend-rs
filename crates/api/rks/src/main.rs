@@ -56,7 +56,7 @@ async fn start() -> Result<(), AppError> {
     let mut hasher = sha3::Sha3_256::new();
     hasher.update(&mk);
     let hash = hasher.finalize();
-    let hash = String::from_utf8(hash.to_ascii_lowercase()).expect("failed to convert hash to string");
+    let hash = to_hex(&hash);
     info!(hash = ?hash, "key derived");
     if hash != config.expected_hash {
       return Err(AppError::InvalidHash(hash));
@@ -104,4 +104,15 @@ async fn shutdown_signal() {
     let _ = tokio::signal::ctrl_c().await;
     info!("received interrupt; shutting down");
   }
+}
+
+fn to_hex(bytes: &[u8]) -> String {
+  const LUT: &[u8; 16] = b"0123456789abcdef";
+  let mut v = Vec::with_capacity(bytes.len() * 2);
+  for &b in bytes {
+    v.push(LUT[(b >> 4) as usize]);
+    v.push(LUT[(b & 0xF) as usize]);
+  }
+  // Safety: we only inserted valid ASCII
+  unsafe { String::from_utf8_unchecked(v) }
 }
