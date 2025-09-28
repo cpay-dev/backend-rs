@@ -3,19 +3,14 @@ use std::os::fd::AsRawFd;
 
 pub fn read_secure(prompt: &str) -> Result<zeroize::Zeroizing<Vec<u8>>, AppError> {
   use std::fs::OpenOptions;
-  use std::io::{Read, Write};
+  use std::io::Read;
 
-  let mut tty_w = OpenOptions::new()
-    .write(true)
-    .open("/dev/tty")
-    .map_err(|e| AppError::Terminal(format!("open tty for write: {}", e)))?;
   let mut tty_r = OpenOptions::new()
     .read(true)
     .open("/dev/tty")
     .map_err(|e| AppError::Terminal(format!("open tty for read: {}", e)))?;
 
-  write!(tty_w, "{}", prompt).map_err(|e| AppError::Terminal(format!("write prompt: {}", e)))?;
-  let _ = tty_w.flush();
+  println!("{}", prompt);
 
   let fd = tty_r.as_raw_fd();
   unsafe {
@@ -51,8 +46,6 @@ pub fn read_secure(prompt: &str) -> Result<zeroize::Zeroizing<Vec<u8>>, AppError
       return Err(AppError::Terminal("tcsetattr restore echo failed".into()));
     }
 
-    let _ = writeln!(tty_w);
-
     while matches!(buf.last(), Some(b'\n' | b'\r')) {
       buf.pop();
     }
@@ -62,19 +55,14 @@ pub fn read_secure(prompt: &str) -> Result<zeroize::Zeroizing<Vec<u8>>, AppError
 
 pub fn read_line(prompt: &str) -> Result<String, AppError> {
   use std::fs::OpenOptions;
-  use std::io::{Read, Write};
+  use std::io::Read;
 
-  let mut tty_w = OpenOptions::new()
-    .write(true)
-    .open("/dev/tty")
-    .map_err(|e| AppError::Terminal(format!("open tty for write: {}", e)))?;
   let mut tty_r = OpenOptions::new()
     .read(true)
     .open("/dev/tty")
     .map_err(|e| AppError::Terminal(format!("open tty for read: {}", e)))?;
 
-  write!(tty_w, "{}", prompt).map_err(|e| AppError::Terminal(format!("write prompt: {}", e)))?;
-  let _ = tty_w.flush();
+  println!("{}", prompt);
 
   let mut s = String::new();
   loop {
@@ -94,6 +82,6 @@ pub fn read_line(prompt: &str) -> Result<String, AppError> {
     s.push(byte[0] as char);
   }
 
-  let _ = writeln!(tty_w);
+  println!();
   Ok(s)
 }
