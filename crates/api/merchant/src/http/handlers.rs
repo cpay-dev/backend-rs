@@ -72,6 +72,7 @@ pub async fn list_assets(
       symbol: a.symbol,
       address: metadata.address,
       decimals: metadata.decimals,
+      is_stable: metadata.is_stable,
     });
   }
 

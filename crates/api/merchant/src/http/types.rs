@@ -28,6 +28,7 @@ pub struct AssetDto {
   pub symbol: String,
   pub address: String,
   pub decimals: u32,
+  pub is_stable: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
