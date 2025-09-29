@@ -1,7 +1,9 @@
-use crate::http::error::ApiHttpError;
 use cpay_proto::cpay;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+use crate::http::error::ApiHttpError;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ChainCode {
   ChainAny,
   AnyBtc,
@@ -38,68 +40,38 @@ impl core::fmt::Display for ChainCode {
   }
 }
 
-impl core::str::FromStr for ChainCode {
-  type Err = ();
-  fn from_str(s: &str) -> Result<Self, Self::Err> {
-    match s {
-      "ANY" => Ok(ChainCode::ChainAny),
-      "ANY_BTC" => Ok(ChainCode::AnyBtc),
-      "ANY_EVM" => Ok(ChainCode::AnyEvm),
-      "ANY_SVM" => Ok(ChainCode::AnySvm),
-      "BTC" => Ok(ChainCode::Btc),
-      "ETH" => Ok(ChainCode::Eth),
-      "ARB" => Ok(ChainCode::Arb),
-      "POLYGON" => Ok(ChainCode::Polygon),
-      "UNI" => Ok(ChainCode::Uni),
-      "SOL" => Ok(ChainCode::Sol),
-      _ => Err(()),
+impl From<ChainCode> for cpay::blockchain::v1::Chain {
+  fn from(e: ChainCode) -> Self {
+    match e {
+      ChainCode::ChainAny => cpay::blockchain::v1::Chain::Any,
+      ChainCode::AnyBtc => cpay::blockchain::v1::Chain::AnyBtc,
+      ChainCode::AnyEvm => cpay::blockchain::v1::Chain::AnyEvm,
+      ChainCode::AnySvm => cpay::blockchain::v1::Chain::AnySvm,
+      ChainCode::Btc => cpay::blockchain::v1::Chain::BtcBitcoin,
+      ChainCode::Eth => cpay::blockchain::v1::Chain::EvmEthereum,
+      ChainCode::Arb => cpay::blockchain::v1::Chain::EvmArbitrum,
+      ChainCode::Polygon => cpay::blockchain::v1::Chain::EvmPolygon,
+      ChainCode::Uni => cpay::blockchain::v1::Chain::EvmUnichain,
+      ChainCode::Sol => cpay::blockchain::v1::Chain::SvmSolana,
     }
   }
 }
 
-pub fn chain_code_from_proto_enum(e: cpay::blockchain::v1::Chain) -> Result<ChainCode, ApiHttpError> {
-  use cpay::blockchain::v1::Chain as E;
-  match e {
-    E::Unspecified => Err(ApiHttpError::Internal("chain unspecified".into())),
-    E::Any => Ok(ChainCode::ChainAny),
-    E::AnyBtc => Ok(ChainCode::AnyBtc),
-    E::AnyEvm => Ok(ChainCode::AnyEvm),
-    E::AnySvm => Ok(ChainCode::AnySvm),
-    E::BtcBitcoin => Ok(ChainCode::Btc),
-    E::EvmEthereum => Ok(ChainCode::Eth),
-    E::EvmArbitrum => Ok(ChainCode::Arb),
-    E::EvmPolygon => Ok(ChainCode::Polygon),
-    E::EvmUnichain => Ok(ChainCode::Uni),
-    E::SvmSolana => Ok(ChainCode::Sol),
-  }
-}
-
-pub fn proto_enum_from_chain_code(code: ChainCode) -> cpay::blockchain::v1::Chain {
-  use cpay::blockchain::v1::Chain as E;
-  match code {
-    ChainCode::ChainAny => E::Any,
-    ChainCode::AnyBtc => E::AnyBtc,
-    ChainCode::AnyEvm => E::AnyEvm,
-    ChainCode::AnySvm => E::AnySvm,
-    ChainCode::Btc => E::BtcBitcoin,
-    ChainCode::Eth => E::EvmEthereum,
-    ChainCode::Arb => E::EvmArbitrum,
-    ChainCode::Polygon => E::EvmPolygon,
-    ChainCode::Uni => E::EvmUnichain,
-    ChainCode::Sol => E::SvmSolana,
-  }
-}
-
-pub fn chain_code_str_from_proto_value(id: i32) -> Result<String, ApiHttpError> {
-  let e = cpay::blockchain::v1::Chain::try_from(id)
-    .map_err(|err| ApiHttpError::Internal(format!("unknown chain id {}: {}", id, err)))?;
-  let code = chain_code_from_proto_enum(e)?;
-  Ok(code.as_str().to_string())
-}
-
-pub fn proto_enum_from_code_str(s: &str) -> Result<cpay::blockchain::v1::Chain, ApiHttpError> {
-  match s.parse::<ChainCode>() {
-    Ok(code) => Ok(proto_enum_from_chain_code(code)),
-    Err(_) => Err(ApiHttpError::BadRequest("invalid chain id".into())),
+impl TryFrom<cpay::blockchain::v1::Chain> for ChainCode {
+  type Error = ApiHttpError;
+  fn try_from(e: cpay::blockchain::v1::Chain) -> Result<Self, Self::Error> {
+    match e {
+      cpay::blockchain::v1::Chain::Any => Ok(ChainCode::ChainAny),
+      cpay::blockchain::v1::Chain::AnyBtc => Ok(ChainCode::AnyBtc),
+      cpay::blockchain::v1::Chain::AnyEvm => Ok(ChainCode::AnyEvm),
+      cpay::blockchain::v1::Chain::AnySvm => Ok(ChainCode::AnySvm),
+      cpay::blockchain::v1::Chain::BtcBitcoin => Ok(ChainCode::Btc),
+      cpay::blockchain::v1::Chain::EvmEthereum => Ok(ChainCode::Eth),
+      cpay::blockchain::v1::Chain::EvmArbitrum => Ok(ChainCode::Arb),
+      cpay::blockchain::v1::Chain::EvmPolygon => Ok(ChainCode::Polygon),
+      cpay::blockchain::v1::Chain::EvmUnichain => Ok(ChainCode::Uni),
+      cpay::blockchain::v1::Chain::SvmSolana => Ok(ChainCode::Sol),
+      cpay::blockchain::v1::Chain::Unspecified => Err(ApiHttpError::Internal("chain unspecified".into())),
+    }
   }
 }

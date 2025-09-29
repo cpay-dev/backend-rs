@@ -8,7 +8,7 @@ use crate::error::AppError;
 use crate::grpc::GrpcState;
 use crate::http::{auth, handlers};
 use app_config::resolve_config_from_args;
-use axum::{Router, routing::get};
+use axum::{Router, routing::get, routing::post};
 use std::net::SocketAddr;
 use tower_http::trace::TraceLayer;
 use tracing::{debug, error, info};
@@ -38,8 +38,11 @@ async fn start() -> Result<(), AppError> {
     .route("/chains", get(handlers::list_chains))
     .route("/{id}/assets", get(handlers::list_assets));
 
+  let payment_router = Router::new().route("/intent", post(handlers::create_payment_intent));
+
   let router: Router = Router::new()
     .nest("/blockchain", blockchain_router)
+    .nest("/payment", payment_router)
     .layer(TraceLayer::new_for_http())
     .layer(axum::middleware::from_fn(auth::auth_middleware))
     .with_state(app_state);

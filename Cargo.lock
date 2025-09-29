@@ -1500,9 +1500,10 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 [[package]]
 name = "cpay-proto"
 version = "1.0.1"
-source = "git+https://github.com/cpay-dev/proto-rs?rev=25434eaa228ee545e9a5af2d2adc92c051c5318e#25434eaa228ee545e9a5af2d2adc92c051c5318e"
+source = "git+https://github.com/cpay-dev/proto-rs?rev=933f65429f927f4b225f14b0b203b1f7a4955ea8#933f65429f927f4b225f14b0b203b1f7a4955ea8"
 dependencies = [
  "prost",
+ "prost-types",
  "tonic",
  "tonic-prost",
 ]
@@ -3374,6 +3375,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.106",
+]
+
+[[package]]
+name = "prost-types"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9b4db3d6da204ed77bb26ba83b6122a73aeb2e87e25fbf7ad2e84c4ccbf8f72"
+dependencies = [
+ "prost",
 ]
 
 [[package]]

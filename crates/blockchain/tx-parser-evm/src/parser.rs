@@ -51,8 +51,8 @@ impl Parser {
     trace!("message received");
     use prost::Message;
     let block = indexer::Block::decode(msg.payload.as_ref())?;
-    trace!(block = block.block_number, "block decoded");
-    let block_number = block.block_number;
+    let block_number = block.base.as_ref().unwrap().block_number;
+    trace!(block = block_number, "block decoded");
     let parsed_block = self.parser.parse(block).await?;
     trace!(block = block_number, transfers = ?parsed_block.transfers, "block parsed");
     self.publish_block(parsed_block).await?;
@@ -63,12 +63,12 @@ impl Parser {
   }
 
   async fn publish_block(&self, parsed_block: indexer::ParsedBlock) -> Result<(), AppError> {
-    trace!(block = parsed_block.block_number, "publishing block");
+    trace!(block = parsed_block.block.as_ref().unwrap().block_number, "publishing block");
 
     use prost::Message;
     let block_data = parsed_block.encode_to_vec();
     trace!(
-      block = parsed_block.block_number,
+      block = parsed_block.block.as_ref().unwrap().block_number,
       data_len = block_data.len(),
       "encoded message"
     );
@@ -91,7 +91,8 @@ impl BlockParser {
   }
 
   async fn parse(&self, block: indexer::Block) -> Result<indexer::ParsedBlock, AppError> {
-    trace!(block = block.block_number, "parsing block");
+    let block_base = block.base.unwrap();
+    trace!(block = block_base.block_number, "parsing block");
 
     let transactions = match block.transactions.ok_or(AppError::BlockTransactionsEmpty)? {
       indexer::block::Transactions::EvmTransactions(evm) => evm,
@@ -152,11 +153,7 @@ impl BlockParser {
     }
 
     Ok(indexer::ParsedBlock {
-      chain: block.chain,
-      confirmation_level: block.confirmation_level,
-      block_hash: block.block_hash,
-      block_number: block.block_number,
-      block_timestamp: block.block_timestamp,
+      block: block_base.into(),
       transfers: parsed_transfers,
     })
   }

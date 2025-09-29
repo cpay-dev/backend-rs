@@ -158,11 +158,13 @@ impl<P: Provider<AnyNetwork>> Indexer<P> {
       Ok(LoopStep::Continue)
     } else {
       let block = indexer::Block {
-        chain: self.chain.into(),
-        confirmation_level: cpay_proto::cpay::blockchain::v1::ConfirmationLevel::Pending.into(),
-        block_hash: current_block.header().hash.to_string(),
-        block_number: state.cursor,
-        block_timestamp: current_block.header().timestamp(),
+        base: indexer::BlockBase {
+          chain: self.chain.into(),
+          confirmation_level: cpay_proto::cpay::blockchain::v1::ConfirmationLevel::Pending.into(),
+          block_hash: current_block.header().hash.to_string(),
+          block_number: state.cursor,
+          block_timestamp: current_block.header().timestamp(),
+        }.into(),
         transactions: indexer::block::Transactions::EvmTransactions(indexer::EvmTransactions {
           serialized_txs: serde_json::to_vec(&transactions)?,
           serialized_receipts: serde_json::to_vec(&receipts)?,
@@ -174,12 +176,12 @@ impl<P: Provider<AnyNetwork>> Indexer<P> {
   }
 
   async fn publish_block(&self, block: indexer::Block) -> Result<(), AppError> {
-    trace!(block = block.block_number, "publishing block");
+    trace!(block = block.base.as_ref().unwrap().block_number, "publishing block");
 
     use prost::Message;
     let block_data = block.encode_to_vec();
     trace!(
-      block = block.block_number,
+      block = block.base.as_ref().unwrap().block_number,
       data_len = block_data.len(),
       "encoded message"
     );
@@ -189,7 +191,7 @@ impl<P: Provider<AnyNetwork>> Indexer<P> {
       .publish(self.js_subject.clone(), block_data.into())
       .await?
       .await?;
-    info!(block = block.block_number, "published message");
+    info!(block = block.base.as_ref().unwrap().block_number, "published message");
 
     Ok(())
   }
