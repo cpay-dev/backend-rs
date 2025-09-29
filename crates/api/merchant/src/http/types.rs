@@ -8,6 +8,18 @@ pub struct ChainDto {
   pub name: String,
 }
 
+#[derive(Debug, thiserror::Error)]
+#[error("invalid PaymentIntentStatus '{input}'")]
+pub struct ParsePaymentIntentStatusError {
+  input: String,
+}
+
+impl ParsePaymentIntentStatusError {
+  pub fn new(input: impl Into<String>) -> Self {
+    Self { input: input.into() }
+  }
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct AssetDto {
   pub id: String,
@@ -18,7 +30,7 @@ pub struct AssetDto {
   pub decimals: u32,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PaymentIntentStatus {
   AwaitingPayment,
   Paid,
@@ -46,6 +58,43 @@ impl PaymentIntentStatus {
 impl core::fmt::Display for PaymentIntentStatus {
   fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
     f.write_str(self.as_str())
+  }
+}
+
+impl core::str::FromStr for PaymentIntentStatus {
+  type Err = ParsePaymentIntentStatusError;
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    let upper = s.trim().to_ascii_uppercase();
+    match upper.as_str() {
+      "AWAITING_PAYMENT" => Ok(PaymentIntentStatus::AwaitingPayment),
+      "PAID" => Ok(PaymentIntentStatus::Paid),
+      "EXPIRED" => Ok(PaymentIntentStatus::Expired),
+      "AML_CHECK_PENDING" => Ok(PaymentIntentStatus::AmlCheckPending),
+      "AML_CHECK_FAILED" => Ok(PaymentIntentStatus::AmlCheckFailed),
+      "REFUND_PENDING" => Ok(PaymentIntentStatus::RefundPending),
+      "REFUNDED" => Ok(PaymentIntentStatus::Refunded),
+      _ => Err(ParsePaymentIntentStatusError::new(s)),
+    }
+  }
+}
+
+impl Serialize for PaymentIntentStatus {
+  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+  where
+    S: serde::ser::Serializer,
+  {
+    serializer.serialize_str(self.as_str())
+  }
+}
+
+impl<'de> Deserialize<'de> for PaymentIntentStatus {
+  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+  where
+    D: serde::de::Deserializer<'de>,
+  {
+    let s = String::deserialize(deserializer)?;
+    s.parse::<PaymentIntentStatus>()
+      .map_err(|e| serde::de::Error::custom(e.to_string()))
   }
 }
 

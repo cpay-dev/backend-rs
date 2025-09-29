@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::http::error::ApiHttpError;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ChainCode {
   ChainAny,
   AnyBtc,
@@ -15,6 +15,18 @@ pub enum ChainCode {
   Polygon,
   Uni,
   Sol,
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error("invalid ChainCode '{input}'")]
+pub struct ParseChainCodeError {
+  input: String,
+}
+
+impl ParseChainCodeError {
+  pub fn new(input: impl Into<String>) -> Self {
+    Self { input: input.into() }
+  }
 }
 
 impl ChainCode {
@@ -37,6 +49,46 @@ impl ChainCode {
 impl core::fmt::Display for ChainCode {
   fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
     f.write_str(self.as_str())
+  }
+}
+
+impl core::str::FromStr for ChainCode {
+  type Err = ParseChainCodeError;
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    let upper = s.trim().to_ascii_uppercase();
+    match upper.as_str() {
+      "ANY" => Ok(ChainCode::ChainAny),
+      "ANY_BTC" => Ok(ChainCode::AnyBtc),
+      "ANY_EVM" => Ok(ChainCode::AnyEvm),
+      "ANY_SVM" => Ok(ChainCode::AnySvm),
+      "BTC" => Ok(ChainCode::Btc),
+      "ETH" => Ok(ChainCode::Eth),
+      "ARB" => Ok(ChainCode::Arb),
+      "POLYGON" => Ok(ChainCode::Polygon),
+      "UNI" => Ok(ChainCode::Uni),
+      "SOL" => Ok(ChainCode::Sol),
+      _ => Err(ParseChainCodeError::new(s)),
+    }
+  }
+}
+
+impl Serialize for ChainCode {
+  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+  where
+    S: serde::ser::Serializer,
+  {
+    serializer.serialize_str(self.as_str())
+  }
+}
+
+impl<'de> Deserialize<'de> for ChainCode {
+  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+  where
+    D: serde::de::Deserializer<'de>,
+  {
+    let s = String::deserialize(deserializer)?;
+    s.parse::<ChainCode>()
+      .map_err(|e| serde::de::Error::custom(e.to_string()))
   }
 }
 
