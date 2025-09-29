@@ -5,8 +5,10 @@ use thiserror::Error;
 pub enum ConfigLoadError {
   #[error("io error: {0}")]
   Io(#[from] std::io::Error),
+
   #[error("serde json error: {0}")]
   Json(#[from] serde_json::Error),
+
   #[error("missing -config file path")]
   MissingConfigPath,
 }

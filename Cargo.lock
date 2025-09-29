@@ -730,6 +730,7 @@ dependencies = [
 name = "api-merchant"
 version = "1.0.1"
 dependencies = [
+ "app-config",
  "axum",
  "cpay-proto",
  "http",

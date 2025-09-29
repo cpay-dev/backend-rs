@@ -11,9 +11,6 @@ pub enum AppError {
   #[error("pem error: {0}")]
   Pem(#[from] rustls::pki_types::pem::Error),
 
-  #[error("serde json error: {0}")]
-  Json(#[from] serde_json::Error),
-
   #[error("failed to add root certificate to root store: {0}")]
   RootCertAdd(String),
 

@@ -7,10 +7,11 @@ use crate::config::Config;
 use crate::error::AppError;
 use crate::grpc::GrpcState;
 use crate::http::{auth, handlers};
+use app_config::resolve_config_from_args;
 use axum::{Router, routing::get};
 use std::net::SocketAddr;
 use tower_http::trace::TraceLayer;
-use tracing::{error, info, trace};
+use tracing::{debug, error, info};
 
 #[tokio::main]
 async fn main() {
@@ -26,9 +27,8 @@ async fn start() -> Result<(), AppError> {
     .compact()
     .init();
 
-  let config_path = resolve_config_path_from_args()?;
-  trace!(?config_path, "reading config at path");
-  let config = Config::from_file(config_path)?;
+  let config: Config = resolve_config_from_args()?;
+  debug!("config loaded");
 
   let grpc_state = GrpcState::connect(&config.merchant_grpc_addr).await?;
 
@@ -56,24 +56,6 @@ async fn start() -> Result<(), AppError> {
     .await?;
   info!("merchant HTTP API stopped");
   Ok(())
-}
-
-fn resolve_config_path_from_args() -> Result<std::path::PathBuf, AppError> {
-  let args: Vec<String> = std::env::args().collect();
-  let mut path = std::path::PathBuf::from("config.json");
-  let mut i = 1;
-  while i < args.len() {
-    if args[i] == "-config" || args[i] == "--config" {
-      if i + 1 >= args.len() {
-        return Err(AppError::MissingConfigPath);
-      }
-      path = std::path::PathBuf::from(&args[i + 1]);
-      i += 2;
-      continue;
-    }
-    i += 1;
-  }
-  Ok(path)
 }
 
 async fn shutdown_signal() {
