@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
 use crate::error::AppError;
-use cpay_proto::cpay::api::v1::merchant::chain_service_client;
-use cpay_proto::cpay::api::v1::merchant::asset_service_client;
-use cpay_proto::cpay::api::v1::merchant::payment_intent_service_client;
+use cpay_proto::cpay::api::v1::merchant::chain::chain_service_client;
+use cpay_proto::cpay::api::v1::merchant::asset::asset_service_client;
+use cpay_proto::cpay::api::v1::merchant::payment::payment_service_client;
 use tonic::metadata::errors::InvalidMetadataValue;
 use tonic::metadata::{MetadataKey, MetadataValue};
 
@@ -13,7 +13,7 @@ const API_KEY_HEADER: &str = "x-api-key";
 pub struct GrpcState {
   pub chain: chain_service_client::ChainServiceClient<tonic::transport::Channel>,
   pub asset: asset_service_client::AssetServiceClient<tonic::transport::Channel>,
-  pub payment: payment_intent_service_client::PaymentIntentServiceClient<tonic::transport::Channel>,
+  pub payment: payment_service_client::PaymentServiceClient<tonic::transport::Channel>,
 }
 
 impl GrpcState {
@@ -21,7 +21,7 @@ impl GrpcState {
     let conn = tonic::transport::Endpoint::new(addr.to_string())?.connect().await?;
     let chain = chain_service_client::ChainServiceClient::new(conn.clone());
     let asset = asset_service_client::AssetServiceClient::new(conn.clone());
-    let payment = payment_intent_service_client::PaymentIntentServiceClient::new(conn.clone());
+    let payment = payment_service_client::PaymentServiceClient::new(conn.clone());
     Ok(Self { chain, asset, payment })
   }
 }

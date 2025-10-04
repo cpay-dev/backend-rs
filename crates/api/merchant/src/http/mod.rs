@@ -1,5 +1,5 @@
 pub mod auth;
-pub mod chain_map;
+pub mod dto;
 pub mod error;
 pub mod handlers;
 pub mod types;

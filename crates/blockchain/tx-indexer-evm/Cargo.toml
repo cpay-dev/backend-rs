@@ -14,5 +14,5 @@ alloy = { version = "=1.0.34", default-features = false, features = ["provider-h
 rand = "=0.10.0-rc.0"
 app-config = { path = "../../lib/app-config" }
 async-nats = { version = "=0.42.0", default-features = false, features = ["server_2_10", "server_2_11", "aws-lc-rs"] }
-cpay-proto = { git = "https://github.com/cpay-dev/proto-rs", rev = "933f65429f927f4b225f14b0b203b1f7a4955ea8" }
+cpay-proto = { git = "https://github.com/cpay-dev/proto-rs", rev = "1150db9abe4739c55f8234eaaf5759c5e99b75fa" }
 prost = "=0.14.1"

@@ -10,7 +10,7 @@ tracing-subscriber = { version = "=0.3.19", features = ["fmt", "env-filter"] }
 ulid = { version = "=1.2.1" }
 zeroize = { version = "=1.8.1" }
 chacha20poly1305 = { version = "=0.11.0-rc.1", features = ["alloc", "os_rng", "zeroize"] }
-cpay-proto = { git = "https://github.com/cpay-dev/proto-rs", rev = "933f65429f927f4b225f14b0b203b1f7a4955ea8" }
+cpay-proto = { git = "https://github.com/cpay-dev/proto-rs", rev = "1150db9abe4739c55f8234eaaf5759c5e99b75fa" }
 tokio = { version = "=1.47.1", features = ["rt-multi-thread", "macros", "rt", "signal"] }
 tonic = { version = "=0.14.2", features = ["transport"] }
 serde = { version = "=1.0.226", features = ["derive"] }
