@@ -41,8 +41,8 @@ async fn start() -> Result<(), AppError> {
     .cloned()
     .ok_or(AppError::NoActiveKek)?;
 
-  trace!(addr = %config.root_grpc_addr, "connecting to root key service");
-  let rks_client = KeyManagementServiceClient::connect(config.root_grpc_addr).await?;
+  trace!(addr = %config.rks_grpc_addr, "connecting to root key service");
+  let rks_client = KeyManagementServiceClient::connect(config.rks_grpc_addr).await?;
   let service = KmsService::new(rks_client, keys, active_key);
 
   let addr: SocketAddr = config.listen_addr.parse()?;

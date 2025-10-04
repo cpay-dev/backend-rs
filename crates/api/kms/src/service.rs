@@ -79,7 +79,7 @@ impl KeyManagementService for KmsService {
 
     let unwrapped_data = lib_crypto::decrypt_data(&kek_cipher, wrapped_data.to_vec())
       .map_err(AppError::Crypto)
-      .map_err(map_err)?;    
+      .map_err(map_err)?;
 
     let encrypted_data = lib_crypto::encrypt_data(&cipher, unwrapped_data.to_vec())
       .map_err(AppError::Crypto)
@@ -115,9 +115,7 @@ impl KmsService {
         data: rks_kek.to_vec(),
         transit_key: rks_key.to_vec(),
       })
-      .await
-      .map_err(AppError::Grpc)
-      .map_err(map_err)?
+      .await?
       .into_inner();
 
     let raw_kek = lib_crypto::decrypt_data(&rks_cipher, raw_kek_resp.decrypted_data)

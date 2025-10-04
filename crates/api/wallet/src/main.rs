@@ -4,11 +4,11 @@ mod service;
 
 use crate::config::Config;
 use crate::error::AppError;
+use crate::service::WalletServiceImpl;
 use app_config::resolve_config_from_args;
-use chacha20poly1305::{AeadCore, Key, KeyInit, XChaCha20Poly1305, aead::Aead};
-use cpay_proto::cpay::api::v1::kms::{
-  UnwrapKeyRequest, WrapKeyRequest, key_management_service_client::KeyManagementServiceClient,
-};
+use cpay_proto::cpay::api::v1::kms::key_management_service_client::KeyManagementServiceClient;
+use std::net::SocketAddr;
+use tonic::transport::Server;
 use tracing::{debug, error, info, trace};
 
 #[tokio::main]
@@ -30,7 +30,45 @@ async fn start() -> Result<(), AppError> {
   debug!("config loaded");
 
   trace!(addr = %config.kms_grpc_addr, "connecting to kms service");
-  let mut kms_client = KeyManagementServiceClient::connect(config.kms_grpc_addr).await?;
+  let kms_client = KeyManagementServiceClient::connect(config.kms_grpc_addr).await?;
+  let service = WalletServiceImpl::new(kms_client);
 
+  let addr: SocketAddr = config.listen_addr.parse()?;
+  let listener = tokio::net::TcpListener::bind(addr).await?;
+  let local_addr = listener.local_addr()?;
+  info!(?local_addr, "serving gRPC");
+
+  Server::builder()
+    .add_service(service.into_server())
+    .serve_with_incoming_shutdown(
+      tokio_stream::wrappers::TcpListenerStream::new(listener),
+      shutdown_signal(),
+    )
+    .await?;
+
+  info!("wallet gRPC API stopped");
   Ok(())
+}
+
+async fn shutdown_signal() {
+  #[cfg(unix)]
+  {
+    let mut term_signal = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+      .expect("failed to install SIGTERM handler");
+    tokio::select! {
+      _ = tokio::signal::ctrl_c() => {
+        info!("received SIGINT; shutting down");
+      }
+      _ = term_signal.recv() => {
+        info!("received SIGTERM; shutting down");
+      }
+    }
+    return;
+  }
+
+  #[cfg(not(unix))]
+  {
+    let _ = tokio::signal::ctrl_c().await;
+    info!("received interrupt; shutting down");
+  }
 }

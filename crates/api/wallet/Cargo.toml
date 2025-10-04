@@ -12,6 +12,7 @@ zeroize = { version = "=1.8.1" }
 chacha20poly1305 = { version = "=0.11.0-rc.1", features = ["zeroize"] }
 cpay-proto = { git = "https://github.com/cpay-dev/proto-rs", rev = "1150db9abe4739c55f8234eaaf5759c5e99b75fa" }
 tokio = { version = "=1.47.1", features = ["rt-multi-thread", "macros", "rt", "signal"] }
+tokio-stream = "=0.1.17"
 tonic = { version = "=0.14.2", features = ["transport"] }
 serde = { version = "=1.0.226", features = ["derive"] }
 serde_json = "=1.0.145"

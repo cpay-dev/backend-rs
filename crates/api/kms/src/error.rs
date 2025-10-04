@@ -32,9 +32,6 @@ pub enum AppError {
   #[error("grpc transport error: {0}")]
   GrpcTransport(#[from] tonic::transport::Error),
 
-  #[error("grpc status: {0}")]
-  Grpc(#[from] tonic::Status),
-
   #[error("address parse error: {0}")]
   AddrParse(#[from] std::net::AddrParseError),
 
