@@ -11,9 +11,6 @@ pub enum AppError {
   #[error("pem error: {0}")]
   Pem(#[from] rustls::pki_types::pem::Error),
 
-  #[error("no KEKs found in database")]
-  NoKeks,
-
   #[error("no ACTIVE KEK found")]
   NoActiveKek,
 
@@ -26,9 +23,6 @@ pub enum AppError {
   #[error("aead generate key error: {0}")]
   AeadGenerateKey(chacha20poly1305::aead::rand_core::OsError),
 
-  #[error("aead error: {0}")]
-  Aead(#[from] chacha20poly1305::aead::Error),
-
   #[error("crypto error: {0}")]
   Crypto(#[from] lib_crypto::Error),
 
@@ -40,12 +34,6 @@ pub enum AppError {
 
   #[error("grpc status: {0}")]
   Grpc(#[from] tonic::Status),
-
-  #[error("ulid decode error: {0}")]
-  UlidDecode(#[from] ulid::DecodeError),
-
-  #[error("utf8 error: {0}")]
-  Utf8(#[from] std::str::Utf8Error),
 
   #[error("address parse error: {0}")]
   AddrParse(#[from] std::net::AddrParseError),

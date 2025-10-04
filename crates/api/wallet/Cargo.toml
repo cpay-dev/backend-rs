@@ -21,3 +21,4 @@ tokio-postgres = { version = "=0.7.13" }
 postgres-types = { version = "=0.2.9", features = ["derive"] }
 lib-crypto = { path = "../../lib/crypto" }
 alloy = { version = "=1.0.34" }
+app-config = { path = "../../lib/app-config" }

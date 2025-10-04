@@ -5,9 +5,6 @@ pub enum AppError {
   #[error("config load error: {0}")]
   ConfigLoad(#[from] app_config::ConfigLoadError),
 
-  #[error("io error: {0}")]
-  Io(#[from] std::io::Error),
-
   #[error("pem error: {0}")]
   Pem(#[from] rustls::pki_types::pem::Error),
 
@@ -28,9 +25,6 @@ pub enum AppError {
 
   #[error("grpc status: {0}")]
   Grpc(#[from] tonic::Status),
-
-  #[error("address parse error: {0}")]
-  AddrParse(#[from] std::net::AddrParseError),
 
   #[error("join error: {0}")]
   Join(#[from] tokio::task::JoinError),

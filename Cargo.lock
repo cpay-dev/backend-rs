@@ -772,6 +772,7 @@ name = "api-wallet"
 version = "1.0.1"
 dependencies = [
  "alloy",
+ "app-config",
  "chacha20poly1305",
  "cpay-proto",
  "lib-crypto",

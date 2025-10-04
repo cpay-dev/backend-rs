@@ -59,7 +59,7 @@ async fn start() -> Result<(), AppError> {
     let hash = to_hex(&hash);
     info!(hash = ?hash, "key derived");
     if hash != config.expected_hash {
-      return Err(AppError::InvalidHash(hash));
+      return Err(AppError::HashMismatch(hash));
     }
     mk
   })?;

@@ -33,9 +33,6 @@ async fn start() -> Result<(), AppError> {
 
   let repo = Repository::init(&config.database).await?;
   let keys = repo.load_keys().await?;
-  if keys.is_empty() {
-    return Err(AppError::NoKeks);
-  }
 
   let active_key = keys
     .iter()
