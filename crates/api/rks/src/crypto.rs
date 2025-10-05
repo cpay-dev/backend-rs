@@ -21,17 +21,6 @@ impl WrappedMasterKey {
     })
   }
 
-  #[inline]
-  fn decrypt_master_key(&self) -> Result<XChaCha20Poly1305, AppError> {
-    let raw = zeroize::Zeroizing::new(
-      self
-        .key_wrap_cipher
-        .decrypt(&self.enc_master_key_nonce, self.enc_master_key.as_ref())?,
-    );
-    let mk = XChaCha20Poly1305::new_from_slice(&raw).map_err(|_| AppError::InvalidKeyLen(raw.len()))?;
-    Ok(mk)
-  }
-
   pub fn wrap(&self, input: zeroize::Zeroizing<Vec<u8>>) -> Result<zeroize::Zeroizing<Vec<u8>>, AppError> {
     let cipher = self.decrypt_master_key()?;
     let nonce = XChaCha20Poly1305::generate_nonce().map_err(AppError::AeadGenerateNonce)?;
@@ -52,5 +41,16 @@ impl WrappedMasterKey {
     let cipher = self.decrypt_master_key()?;
     let plaintext = zeroize::Zeroizing::new(cipher.decrypt(&nonce, ct)?);
     Ok(plaintext)
+  }
+
+  #[inline(always)]
+  fn decrypt_master_key(&self) -> Result<XChaCha20Poly1305, AppError> {
+    let raw = zeroize::Zeroizing::new(
+      self
+        .key_wrap_cipher
+        .decrypt(&self.enc_master_key_nonce, self.enc_master_key.as_ref())?,
+    );
+    let mk = XChaCha20Poly1305::new_from_slice(&raw).map_err(|_| AppError::InvalidKeyLen(raw.len()))?;
+    Ok(mk)
   }
 }
