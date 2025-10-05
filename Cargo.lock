@@ -1502,7 +1502,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 [[package]]
 name = "cpay-proto"
 version = "1.0.1"
-source = "git+https://github.com/cpay-dev/proto-rs?rev=1150db9abe4739c55f8234eaaf5759c5e99b75fa#1150db9abe4739c55f8234eaaf5759c5e99b75fa"
+source = "git+https://github.com/cpay-dev/proto-rs?rev=a308006c65a0c268df23a03bde859b8835eca85b#a308006c65a0c268df23a03bde859b8835eca85b"
 dependencies = [
  "prost",
  "prost-types",

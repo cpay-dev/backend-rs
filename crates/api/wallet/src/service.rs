@@ -33,12 +33,7 @@ impl WalletService for WalletServiceImpl {
     request: Request<CreateWalletRequest>,
   ) -> Result<Response<CreateWalletResponse>, Status> {
     let req = request.into_inner();
-
     let chain = Chain::try_from(req.chain).map_err(|_| Status::invalid_argument("Invalid chain"))?;
-
-    let transit_cipher = XChaCha20Poly1305::new_from_slice(&req.transit_key)
-      .map_err(|_| Status::invalid_argument("Invalid transit key"))?;
-
     match chain {
       Chain::AnyEvm => {
         let pk = alloy::signers::local::PrivateKeySigner::random();
@@ -67,13 +62,10 @@ impl WalletService for WalletServiceImpl {
         let wrapped_pk = lib_crypto::decrypt_data(&wrap_cipher, wrap_resp.encrypted_data)
           .map_err(AppError::Crypto)
           .map_err(map_err)?;
-        let encrypted_data = lib_crypto::encrypt_data(&transit_cipher, wrapped_pk.to_vec())
-          .map_err(AppError::Crypto)
-          .map_err(map_err)?;
 
         Ok(Response::new(CreateWalletResponse {
           kek_version: wrap_resp.version,
-          encrypted_private_key: encrypted_data.to_vec(),
+          encrypted_private_key: wrapped_pk.to_vec(),
           public_key: pk.public_key().to_string(),
         }))
       }
