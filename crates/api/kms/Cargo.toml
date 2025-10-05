@@ -22,3 +22,6 @@ tokio-postgres = { version = "=0.7.13" }
 postgres-types = { version = "=0.2.9", features = ["derive"] }
 lib-crypto = { path = "../../lib/crypto" }
 app-config = { path = "../../lib/app-config" }
+
+[dev-dependencies]
+tonic = { version = "=0.14.2", features = ["transport", "tls-aws-lc"] }
