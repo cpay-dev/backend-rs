@@ -14,7 +14,6 @@ pub struct DatabaseConfig {
   pub password: String,
   pub database: String,
   pub ssl_mode: String,
-  pub tls_cert_path: String,
 }
 
 impl DatabaseConfig {

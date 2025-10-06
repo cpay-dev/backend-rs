@@ -14,9 +14,6 @@ pub enum AppError {
   #[error("no ACTIVE KEK found")]
   NoActiveKek,
 
-  #[error("failed to add root certificate to root store: {0}")]
-  RootCertAdd(String),
-
   #[error("postgres error: {0}")]
   Pg(#[from] tokio_postgres::Error),
 

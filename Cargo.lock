@@ -673,7 +673,6 @@ dependencies = [
  "rustls",
  "rustls-tokio-postgres",
  "serde",
- "serde_json",
  "thiserror 2.0.16",
  "tokio",
  "tokio-postgres",
@@ -681,8 +680,6 @@ dependencies = [
  "tonic",
  "tracing",
  "tracing-subscriber",
- "ulid",
- "zeroize",
 ]
 
 [[package]]
@@ -697,15 +694,12 @@ dependencies = [
  "rustls",
  "rustls-tokio-postgres",
  "serde",
- "serde_json",
  "thiserror 2.0.16",
  "tokio",
  "tokio-postgres",
  "tonic",
  "tracing",
  "tracing-subscriber",
- "ulid",
- "zeroize",
 ]
 
 [[package]]
@@ -723,7 +717,6 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "ulid",
- "zeroize",
 ]
 
 [[package]]
@@ -735,7 +728,6 @@ dependencies = [
  "cpay-proto",
  "http",
  "serde",
- "serde_json",
  "thiserror 2.0.16",
  "tokio",
  "tonic",
@@ -755,7 +747,6 @@ dependencies = [
  "lib-crypto",
  "libc",
  "serde",
- "serde_json",
  "sha3 0.11.0-rc.3",
  "thiserror 2.0.16",
  "tokio",
@@ -776,19 +767,13 @@ dependencies = [
  "chacha20poly1305",
  "cpay-proto",
  "lib-crypto",
- "postgres-types",
- "rustls",
- "rustls-tokio-postgres",
  "serde",
- "serde_json",
  "thiserror 2.0.16",
  "tokio",
- "tokio-postgres",
  "tokio-stream",
  "tonic",
  "tracing",
  "tracing-subscriber",
- "ulid",
  "zeroize",
 ]
 
@@ -1274,7 +1259,6 @@ dependencies = [
  "cpay-proto",
  "futures-util",
  "prost",
- "rand 0.10.0-rc.0",
  "serde",
  "serde_json",
  "thiserror 2.0.16",
@@ -3837,6 +3821,7 @@ dependencies = [
  "tokio",
  "tokio-postgres",
  "tokio-rustls",
+ "webpki-roots 1.0.2",
 ]
 
 [[package]]
