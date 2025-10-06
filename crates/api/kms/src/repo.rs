@@ -1,7 +1,7 @@
-use crate::config::{DatabaseConfig};
+use crate::config::DatabaseConfig;
 use crate::error::AppError;
 use postgres_types::{FromSql, ToSql};
-use rustls_tokio_postgres::{config_webpki_roots, MakeRustlsConnect};
+use rustls_tokio_postgres::{MakeRustlsConnect, config_webpki_roots};
 use tracing::{error, info, trace};
 
 pub struct Repository {
