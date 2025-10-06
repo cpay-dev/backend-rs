@@ -8,9 +8,6 @@ pub enum AppError {
   #[error("io error: {0}")]
   Io(#[from] std::io::Error),
 
-  #[error("pem error: {0}")]
-  Pem(#[from] rustls::pki_types::pem::Error),
-
   #[error("no ACTIVE KEK found")]
   NoActiveKek,
 

@@ -32,7 +32,6 @@ pub struct Indexer<P: Provider<AnyNetwork>> {
   confirmation_level: ConfirmationLevel,
   start_at_block: Option<u64>,
   stop_at_block: Option<u64>,
-
   chain: cpay_proto::cpay::blockchain::v1::Chain,
 }
 

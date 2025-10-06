@@ -1,8 +1,7 @@
 use crate::config::DatabaseConfig;
 use crate::error::AppError;
 use postgres_types::{FromSql, ToSql};
-use rustls::pki_types::{CertificateDer, pem::PemObject};
-use rustls_tokio_postgres::MakeRustlsConnect;
+use rustls_tokio_postgres::{config_webpki_roots, MakeRustlsConnect};
 use tracing::{error, info, trace};
 
 pub struct Repository {
@@ -33,15 +32,7 @@ impl Repository {
   pub async fn init(config: &DatabaseConfig) -> Result<Self, AppError> {
     trace!("initializing postgres repository");
 
-    let mut roots = rustls::RootCertStore::empty();
-    let root_cert = CertificateDer::from_pem_file(&config.tls_cert_path)?;
-    roots.add(root_cert).map_err(|e| AppError::RootCertAdd(e.to_string()))?;
-
-    let tls_config = rustls::ClientConfig::builder()
-      .with_root_certificates(roots)
-      .with_no_client_auth();
-    let tls = MakeRustlsConnect::new(tls_config);
-
+    let tls = MakeRustlsConnect::new(config_webpki_roots());
     let (client, connection) = tokio_postgres::connect(&config.conn_string(), tls).await?;
 
     let connection_task = tokio::spawn(async move {

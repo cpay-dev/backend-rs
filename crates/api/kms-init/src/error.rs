@@ -5,9 +5,6 @@ pub enum AppError {
   #[error("config load error: {0}")]
   ConfigLoad(#[from] app_config::ConfigLoadError),
 
-  #[error("pem error: {0}")]
-  Pem(#[from] rustls::pki_types::pem::Error),
-
   #[error("failed to add root certificate to root store: {0}")]
   RootCertAdd(String),
 
