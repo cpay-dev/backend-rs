@@ -1,0 +1,37 @@
+[workspace]
+members = [
+	"crates/api/dashboard"
+]
+resolver = "2"
+
+[workspace.package]
+version = "1.0.1"
+edition = "2024"
+rust-version = "1.90"
+publish = false
+
+[workspace.dependencies]
+app-config = { git = "https://github.com/TrenchesFi/common-rs", tag = "v1.0.1", default-features = false }
+cpay-proto = { git = "https://github.com/cpay-dev/proto-rs", rev = "2c160b151e5adfca0469a9b04e158c5b4bd99ebe", default-features = false }
+
+serde = { version = "=1.0.228", default-features = false, features = ["derive"] }
+serde_json = { version = "=1.0.145", default-features = false }
+thiserror = { version = "=2.0.16", default-features = false }
+anyhow = { version = "=1.0.100", default-features = false }
+tracing = { version = "=0.1.41", default-features = false }
+tracing-subscriber = { version = "=0.3.20", default-features = false, features = ["env-filter", "fmt"] }
+
+tokio = { version = "=1.48.0", default-features = false, features = ["rt-multi-thread", "macros"] }
+tonic = { version = "=0.14.2", default-features = false, features = ["zstd", "tls-aws-lc", "tls-webpki-roots"] }
+axum = { version = "=0.8.6", default-features = false, features = ["http2", "tokio", "json", "query"] }
+axum-extra = { version = "=0.10.3", default-features = false, features = ["cookie"] }
+tower-http = { version = "=0.6.6", default-features = false, features = ["trace"] }
+tower-cookies = { version = "=0.11.0", default-features = false }
+
+[profile.dev]
+debug = "line-tables-only"
+split-debuginfo = "unpacked"
+
+[profile.release]
+strip = "symbols"
+lto = "fat"
