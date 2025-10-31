@@ -1,6 +1,10 @@
-use axum::{Router, routing::{post, get}};
-use tower_cookies::CookieManagerLayer;
+use axum::{
+	Router,
+	routing::{get, post},
+};
 use cpay_proto::cpay::api::v1::authn::authn_service_client::AuthnServiceClient;
+use tower_cookies::CookieManagerLayer;
+use tower_http::cors::{Any, CorsLayer, Vary};
 use tower_http::trace::TraceLayer;
 
 pub mod dto;
@@ -16,6 +20,7 @@ pub fn build_router(state: AppState) -> Router {
 		.route("/authn/google", post(service::post_authn_google))
 		.route("/authn/callback/google", get(service::get_authn_callback_google))
 		.with_state(state)
-        .layer(CookieManagerLayer::new())
+		.layer(CookieManagerLayer::new())
 		.layer(TraceLayer::new_for_http())
+		.layer(CorsLayer::new().allow_origin(Any).vary(Vary::default()))
 }
