@@ -21,6 +21,8 @@ pub struct AppState {
 }
 
 pub fn build_router(state: AppState) -> Router {
+	// validate cache
+	
 	Router::new()
 		.route("/authn/google", post(service::post_authn_google))
 		.route("/authn/callback/google", get(service::get_authn_callback_google))
