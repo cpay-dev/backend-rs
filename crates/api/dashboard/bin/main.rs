@@ -3,6 +3,8 @@ use anyhow::{Context, Result};
 use crate::config::Config;
 use api_dashboard::{AppState, build_router};
 use cpay_proto::cpay::api::v1::authn::authn_service_client::AuthnServiceClient;
+use std::time::Duration;
+use tonic::transport::Endpoint;
 
 mod config;
 
@@ -15,7 +17,11 @@ async fn main() -> Result<()> {
 
 	let config: Config = app_config::resolve_config_from_args().context("failed to load config")?;
 
-	let authn_client = AuthnServiceClient::connect(config.authn_service_url)
+	let endpoint = Endpoint::new(config.authn_service_url)
+		.context("invalid authn service url")?
+		.connect_timeout(Duration::from_secs(5))
+		.timeout(Duration::from_secs(10));
+	let authn_client = AuthnServiceClient::connect(endpoint)
 		.await
 		.context("failed to connect to authn service")?;
 	let state = AppState { authn_client };
