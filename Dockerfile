@@ -13,11 +13,9 @@ ENV PATH=/usr/local/cargo/bin:/usr/local/rustup/bin:$PATH
 COPY rust-toolchain.toml Cargo.toml Cargo.lock ./
 COPY crates/api/dashboard/Cargo.toml crates/api/dashboard/Cargo.toml
 
-RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
-  --mount=type=cache,id=cargo-git,target=/usr/local/cargo/git \
-  mkdir crates/api/dashboard/bin \
-  && printf 'fn main(){println!("stub");}\n' > crates/api/dashboard/bin/main.rs \
-  && cargo build --locked --release -p "$PACKAGE"
+RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry,sharing=locked \
+  --mount=type=cache,id=cargo-git,target=/usr/local/cargo/git,sharing=locked \
+  cargo fetch --locked
 
 COPY . .
 
