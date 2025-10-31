@@ -3,9 +3,8 @@ use axum::response::{IntoResponse, Response};
 use serde::Serialize;
 
 #[derive(Serialize)]
-pub struct ErrorResponse {
-	pub code: String,
-	pub message: Option<String>,
+pub struct InitAuthResponseDto {
+	pub redirect_url: String,
 }
 
 #[derive(Serialize)]
@@ -54,9 +53,7 @@ impl IntoResponse for ApiError {
 				tracing::error!(?error, "internal error");
 				(StatusCode::INTERNAL_SERVER_ERROR, "").into_response()
 			}
-			Self::BadRequest(message) => {
-				(StatusCode::BAD_REQUEST, message).into_response()
-			}
+			Self::BadRequest(message) => (StatusCode::BAD_REQUEST, message).into_response(),
 		}
 	}
 }

@@ -1,8 +1,5 @@
 use anyhow::{Context, anyhow};
-use axum::http::{
-	HeaderMap, HeaderValue, StatusCode,
-	header::{LOCATION, SET_COOKIE},
-};
+use axum::http::{HeaderMap, HeaderValue, StatusCode, header::SET_COOKIE};
 use axum::{
 	Json,
 	extract::{Query, State},
@@ -12,7 +9,9 @@ use axum_extra::extract::CookieJar;
 use tower_cookies::cookie::{Cookie, SameSite, time::Duration};
 
 use crate::AppState;
-use crate::dto::{ApiError, ContinueAuthResponseDataDto, ContinueAuthResponseDto, ProviderCallbackDataDto};
+use crate::dto::{
+	ApiError, ContinueAuthResponseDataDto, ContinueAuthResponseDto, InitAuthResponseDto, ProviderCallbackDataDto,
+};
 
 use cpay_proto::cpay::api::v1::authn::{
 	AuthProvider, ContinueAuthRequest, ContinueAuthResponse, InitAuthRequest, ProviderCallbackMethod, ProviderMethod,
@@ -44,11 +43,6 @@ pub async fn post_authn_google(State(state): State<AppState>) -> Result<impl Int
 	};
 
 	let mut headers = HeaderMap::new();
-	let location = HeaderValue::from_str(&redirect_url)
-		.with_context(|| "invalid redirect url from upstream")
-		.map_err(ApiError::Internal)?;
-	headers.insert(LOCATION, location);
-
 	let cookie = Cookie::build((GOOGLE_OAUTH_STATE_COOKIE, state_value))
 		.path("/authn")
 		.http_only(true)
@@ -61,7 +55,8 @@ pub async fn post_authn_google(State(state): State<AppState>) -> Result<impl Int
 		.map_err(ApiError::Internal)?;
 	headers.insert(SET_COOKIE, cookie_value);
 
-	Ok((StatusCode::FOUND, headers))
+	let dto = InitAuthResponseDto { redirect_url };
+	Ok((StatusCode::OK, headers, Json(dto)))
 }
 
 #[derive(serde::Deserialize)]

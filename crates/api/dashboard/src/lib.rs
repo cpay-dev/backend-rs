@@ -1,3 +1,7 @@
+use std::time::Duration;
+
+use axum::http::header::HeaderName;
+use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
 use axum::http::{HeaderValue, Method};
 use axum::{
 	Router,
@@ -31,8 +35,13 @@ pub fn build_router(state: AppState) -> Router {
 					HeaderValue::from_static("https://cpay.wtf"),
 				])
 				.allow_methods([Method::GET, Method::POST])
-				.allow_headers(AllowHeaders::mirror_request())
+				.allow_headers(AllowHeaders::list([
+					AUTHORIZATION,
+					CONTENT_TYPE,
+					HeaderName::from_static("x-requested-with"),
+				]))
 				.allow_credentials(true)
-				.vary(Vary::default()),
+				.vary(Vary::default())
+				.max_age(Duration::from_secs(600)),
 		)
 }
