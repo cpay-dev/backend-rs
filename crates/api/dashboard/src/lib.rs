@@ -30,8 +30,8 @@ pub fn build_router(state: AppState) -> Router {
 		.layer(
 			CorsLayer::new()
 				.allow_origin([
-					HeaderValue::from_static("https://localhost.local:3443"),
 					HeaderValue::from_static("https://cpay.wtf"),
+					HeaderValue::from_static("https://cpay.wtf:3443"),
 				])
 				.allow_methods([Method::GET, Method::POST])
 				.allow_headers(AllowHeaders::list([
