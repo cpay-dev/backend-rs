@@ -5,7 +5,7 @@ use axum::{
 };
 use cpay_proto::cpay::api::v1::authn::authn_service_client::AuthnServiceClient;
 use tower_cookies::CookieManagerLayer;
-use tower_http::cors::{Any, CorsLayer, Vary};
+use tower_http::cors::{AllowHeaders, CorsLayer, Vary};
 use tower_http::trace::TraceLayer;
 
 pub mod dto;
@@ -31,7 +31,7 @@ pub fn build_router(state: AppState) -> Router {
 					HeaderValue::from_static("https://cpay.wtf"),
 				])
 				.allow_methods([Method::GET, Method::POST])
-				.allow_headers(Any)
+				.allow_headers(AllowHeaders::mirror_request())
 				.allow_credentials(true)
 				.vary(Vary::default()),
 		)
