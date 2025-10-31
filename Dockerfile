@@ -17,8 +17,9 @@ RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
   --mount=type=cache,id=cargo-git,target=/usr/local/cargo/git \
   mkdir -p crates/api/dashboard/src \
   && printf 'fn main(){println!("stub");}\n' > crates/api/dashboard/src/main.rs \
-  # && cargo build --locked --release -p "$PACKAGE" || true
   && cargo build --locked -p "$PACKAGE" || true
+
+# && cargo build --locked --release -p "$PACKAGE" || true
 
 COPY . .
 
@@ -26,10 +27,11 @@ RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
   --mount=type=cache,id=cargo-git,target=/usr/local/cargo/git \
   --mount=type=cache,id=cargo-target,target=/workspace/target \
   BIN_NAME="${BIN:-$PACKAGE}" \
-  # && cargo build --locked --release -p "$PACKAGE" \
   && cargo build --locked -p "$PACKAGE" \
   && install -Dm755 "target/release/${BIN_NAME}" /out/app \
   && ln -sf app "/out/${BIN_NAME}"
+
+# && cargo build --locked --release -p "$PACKAGE" \
 
 FROM gcr.io/distroless/cc-debian13:nonroot AS runtime
 
