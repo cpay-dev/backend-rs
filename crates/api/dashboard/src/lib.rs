@@ -1,10 +1,11 @@
+use axum::http::HeaderValue;
 use axum::{
 	Router,
 	routing::{get, post},
 };
 use cpay_proto::cpay::api::v1::authn::authn_service_client::AuthnServiceClient;
 use tower_cookies::CookieManagerLayer;
-use tower_http::cors::{Any, CorsLayer, Vary};
+use tower_http::cors::{CorsLayer, Vary};
 use tower_http::trace::TraceLayer;
 
 pub mod dto;
@@ -22,5 +23,13 @@ pub fn build_router(state: AppState) -> Router {
 		.with_state(state)
 		.layer(CookieManagerLayer::new())
 		.layer(TraceLayer::new_for_http())
-		.layer(CorsLayer::new().allow_origin(Any).vary(Vary::default()))
+		.layer(
+			CorsLayer::new()
+				.allow_origin([
+					HeaderValue::from_static("http://localhost:3000"),
+					HeaderValue::from_static("http://192.168.88.248:3000"),
+					HeaderValue::from_static("https://cpay.wtf"),
+				])
+				.vary(Vary::default()),
+		)
 }
