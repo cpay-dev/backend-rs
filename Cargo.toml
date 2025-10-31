@@ -35,3 +35,4 @@ split-debuginfo = "unpacked"
 [profile.release]
 strip = "symbols"
 lto = "fat"
+opt-level = 3
